@@ -6,6 +6,7 @@
 import random
 
 
+# 判定する関数
 def judge(secret, guess):
     """secret と guess（同じ桁数の文字列）を比べて (hit, blow) を返す。
 
@@ -17,6 +18,9 @@ def judge(secret, guess):
     return hits, common - hits
 
 
+# 回答を作る関数
 def make_secret(digits=3):
     """重複なしの digits 桁の答えを作る。"""
     return "".join(random.sample("0123456789", digits))
+
+

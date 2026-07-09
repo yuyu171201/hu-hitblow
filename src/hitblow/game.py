@@ -8,6 +8,8 @@
 
 from .core import judge, make_secret
 
+import time
+
 
 def play(digits=3):
     secret = make_secret(digits)
@@ -24,6 +26,9 @@ def play(digits=3):
         #      if guess == "h":
         #          print(hint(secret)); continue
 
+        if tries == 1:
+            start = time.time()
+
         if len(guess) != digits or not guess.isdigit():
             print(f"{digits} 桁の数字で入力してね")
             continue
@@ -32,7 +37,9 @@ def play(digits=3):
         print(f"  Hit={hit}  Blow={blow}")
         if hit == digits:
 
+            end = time.time()
             # ===== ③ 勝利時に足す（スコア・履歴 など）: ここに書く =====
 
             print(f"正解！ {tries} 回で当たり（答え {secret}）")
+            print(f"所要時間: {end - start:.2f} 秒")
             break
