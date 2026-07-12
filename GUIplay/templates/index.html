@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hit &amp; Blow — GUI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="header">
+  <h1>Hit &amp; Blow</h1>
+  <p>3 桁の数字を当てよう（重複なし）</p>
+</div>
+
+<div class="game-container">
+  <!-- Status -->
+  <div class="card">
+    <div class="status-bar">
+      <div>
+        <span class="label">回数</span>
+        <span class="value" id="tries-count">0</span>
+      </div>
+      <div>
+        <span class="label">経過時間</span>
+        <span class="value" id="timer">00:00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <div class="card">
+    <!-- Message -->
+    <div class="message" id="message"></div>
+
+    <!-- Digit Slots -->
+    <div class="slots-wrapper">
+      <div class="slot selected" data-index="0" onclick="selectSlot(0)"></div>
+      <div class="slot" data-index="1" onclick="selectSlot(1)"></div>
+      <div class="slot" data-index="2" onclick="selectSlot(2)"></div>
+    </div>
+
+    <!-- Number Pad -->
+    <div class="numpad">
+      <button class="num-btn" onclick="inputDigit('0')">0</button>
+      <button class="num-btn" onclick="inputDigit('1')">1</button>
+      <button class="num-btn" onclick="inputDigit('2')">2</button>
+      <button class="num-btn" onclick="inputDigit('3')">3</button>
+      <button class="num-btn" onclick="inputDigit('4')">4</button>
+      <button class="num-btn" onclick="inputDigit('5')">5</button>
+      <button class="num-btn" onclick="inputDigit('6')">6</button>
+      <button class="num-btn" onclick="inputDigit('7')">7</button>
+      <button class="num-btn" onclick="inputDigit('8')">8</button>
+      <button class="num-btn" onclick="inputDigit('9')">9</button>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-row">
+      <button class="btn btn-clear" onclick="clearSlots()">クリア</button>
+      <button class="btn btn-submit" id="submit-btn" onclick="submitGuess()" disabled>送信</button>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="card" id="history-card" style="display:none;">
+    <div class="history-title">履歴</div>
+    <ul class="history-list" id="history-list"></ul>
+  </div>
+</div>
+
+<!-- Victory Overlay -->
+<div class="victory-overlay" id="victory-overlay">
+  <div class="victory-card">
+    <div class="victory-emoji">🎉</div>
+    <h2>正解！</h2>
+    <div class="victory-stats" id="victory-stats"></div>
+    <button class="btn-new-game" onclick="newGame()">もう一度遊ぶ</button>
+  </div>
+</div>
+<div class="confetti-container" id="confetti-container"></div>
+
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+</body>
+</html>
