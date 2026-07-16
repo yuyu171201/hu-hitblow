@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hitblow-gui",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "python", "GUIplay/server.py"],
+      "port": 5000,
+      "autoPort": true
+    }
+  ]
+}

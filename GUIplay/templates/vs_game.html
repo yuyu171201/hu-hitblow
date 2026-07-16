@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hit &amp; Blow — 対戦</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="header">
+  <h1>Hit &amp; Blow 対戦</h1>
+  <p>先に 3HIT を出したユーザーの勝ち（3 桁・重複なし）</p>
+</div>
+
+<div class="game-container">
+  <!-- Turn / status banner -->
+  <div class="card">
+    <div class="vs-banner" id="banner">接続中…</div>
+  </div>
+
+  <!-- Both players' histories -->
+  <div class="card">
+    <div class="vs-boards" id="boards">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- Item (High/Low hint, self only) -->
+  <div class="card" id="item-card">
+    <div class="items-title">アイテム（1回のみ・自分だけに表示）</div>
+    <div class="item-row">
+      <button class="btn-item" id="item-highlow" onclick="useItem()">🔍 大小ヒント</button>
+    </div>
+    <div class="item-hint" id="item-hint"></div>
+  </div>
+
+  <!-- Input area -->
+  <div class="card" id="input-card">
+    <div class="message" id="message"></div>
+
+    <div class="slots-wrapper">
+      <div class="slot selected" data-index="0" onclick="selectSlot(0)"></div>
+      <div class="slot" data-index="1" onclick="selectSlot(1)"></div>
+      <div class="slot" data-index="2" onclick="selectSlot(2)"></div>
+    </div>
+
+    <div class="numpad">
+      <button class="num-btn" onclick="inputDigit('0')">0</button>
+      <button class="num-btn" onclick="inputDigit('1')">1</button>
+      <button class="num-btn" onclick="inputDigit('2')">2</button>
+      <button class="num-btn" onclick="inputDigit('3')">3</button>
+      <button class="num-btn" onclick="inputDigit('4')">4</button>
+      <button class="num-btn" onclick="inputDigit('5')">5</button>
+      <button class="num-btn" onclick="inputDigit('6')">6</button>
+      <button class="num-btn" onclick="inputDigit('7')">7</button>
+      <button class="num-btn" onclick="inputDigit('8')">8</button>
+      <button class="num-btn" onclick="inputDigit('9')">9</button>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-clear" onclick="clearSlots()">クリア</button>
+      <button class="btn btn-submit" id="submit-btn" onclick="submitGuess()" disabled>送信</button>
+    </div>
+  </div>
+</div>
+
+<!-- Result overlay -->
+<div class="victory-overlay" id="result-overlay">
+  <div class="victory-card" id="result-card">
+    <div class="victory-emoji" id="result-emoji">🎉</div>
+    <h2 id="result-title">勝利！</h2>
+    <div class="victory-stats" id="result-stats"></div>
+    <a class="btn-new-game" href="{{ url_for('game.vs_lobby') }}" style="text-decoration:none;display:inline-block;">もう一度対戦</a>
+    <a href="{{ url_for('game.menu') }}" style="display:block;margin-top:0.8rem;color:var(--text-secondary);font-size:0.85rem;">メニューへ</a>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/vs.js') }}"></script>
+</body>
+</html>

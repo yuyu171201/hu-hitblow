@@ -20,9 +20,11 @@ class HitBlowGame:
     GUIplay/routes.py から import して使う。
     """
 
-    def __init__(self, digits=3):
+    def __init__(self, digits=3, secret=None):
         self.digits = digits
-        self.secret = make_secret(digits)
+        # secret を渡せば「相手が決めた答え」で開始（対戦モード用）。
+        # 省略時は従来どおりランダム生成（1人プレイ）。
+        self.secret = secret if secret is not None else make_secret(digits)
         self.tries = 0
         # ① 開始時（play() の① と同じ）: ライフ・アイテム・タイマー
         self.lives = 15

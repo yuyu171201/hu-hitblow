@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hit &amp; Blow — 対戦ロビー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="header">
+  <h1>2人対戦</h1>
+  <p>名前を入れて対戦相手を待とう（3 桁・重複なし／先に 3HIT で勝ち）</p>
+  <p class="back-link"><a href="{{ url_for('game.menu') }}">← モード選択に戻る</a></p>
+</div>
+
+<div class="game-container">
+  <div class="card">
+    <div class="message error" id="lobby-error" style="display:none;"></div>
+    <label class="lobby-label" for="name">ユーザー名</label>
+    <input class="secret-input" id="name" type="text" maxlength="12"
+           placeholder="なまえ" autocomplete="off" autofocus
+           style="letter-spacing:normal;font-size:1.4rem;">
+    <button class="btn btn-submit" id="join-btn" style="width:100%;margin-top:1rem;">
+      対戦に参加する →
+    </button>
+    <p class="setup-note" style="margin-top:1rem;margin-bottom:0;">
+      別の端末（または別ブラウザ）から同じように参加すると対戦できます。
+    </p>
+  </div>
+</div>
+
+<script>
+  const btn = document.getElementById('join-btn');
+  const nameInput = document.getElementById('name');
+  const errBox = document.getElementById('lobby-error');
+
+  async function join() {
+    const name = nameInput.value.trim();
+    if (!name) {
+      errBox.textContent = 'ユーザー名を入力してください';
+      errBox.style.display = 'block';
+      return;
+    }
+    btn.disabled = true;
+    try {
+      const res = await fetch('/vs/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      const data = await res.json();
+      // pid はタブ単位で保持（同一ブラウザの別タブでも別プレイヤーになれる）
+      sessionStorage.setItem('vs_pid', data.pid);
+      sessionStorage.setItem('vs_name', name);
+      window.location.href = '/vs/play';
+    } catch (e) {
+      errBox.textContent = '通信エラーが発生しました';
+      errBox.style.display = 'block';
+      btn.disabled = false;
+    }
+  }
+
+  btn.addEventListener('click', join);
+  nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') join(); });
+</script>
+</body>
+</html>

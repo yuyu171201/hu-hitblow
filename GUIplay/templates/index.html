@@ -12,7 +12,8 @@
 
 <div class="header">
   <h1>Hit &amp; Blow</h1>
-  <p>3 桁の数字を当てよう（重複なし）</p>
+  <p>{{ subtitle | default('3 桁の数字を当てよう（重複なし）') }}</p>
+  <p class="back-link"><a href="{{ url_for('game.menu') }}">← モード選択に戻る</a></p>
 </div>
 
 <div class="game-container">
@@ -34,7 +35,8 @@
     </div>
   </div>
 
-  <!-- Items -->
+  {% if mode != 'vs' %}
+  <!-- Items（1人プレイのみ。対戦では相手が決めた答えのため非表示） -->
   <div class="card">
     <div class="items-title">アイテム（1ゲーム1回のみ）</div>
     <div class="item-row">
@@ -43,6 +45,7 @@
     </div>
     <div class="item-hint" id="item-hint"></div>
   </div>
+  {% endif %}
 
   <!-- Input Area -->
   <div class="card">
@@ -90,7 +93,7 @@
     <div class="victory-emoji">🎉</div>
     <h2>正解！</h2>
     <div class="victory-stats" id="victory-stats"></div>
-    <button class="btn-new-game" onclick="newGame()">もう一度遊ぶ</button>
+    <button class="btn-new-game" id="victory-btn" onclick="newGame()">もう一度遊ぶ</button>
   </div>
 </div>
 <div class="confetti-container" id="confetti-container"></div>
@@ -101,10 +104,19 @@
     <div class="gameover-emoji">💀</div>
     <h2>ゲームオーバー</h2>
     <div class="gameover-stats" id="gameover-stats"></div>
-    <button class="btn-new-game" onclick="newGame()">もう一度遊ぶ</button>
+    <button class="btn-new-game" id="gameover-btn" onclick="newGame()">もう一度遊ぶ</button>
   </div>
 </div>
 
+<script>
+  // モードごとの通信先・終了時の挙動を game.js に渡す
+  window.GAME_CONFIG = {
+    mode: "{{ mode | default('solo') }}",
+    guessUrl: "{{ '/vs/guess' if mode == 'vs' else '/guess' }}",
+    itemUrl: "/item",
+    newGameUrl: "/new_game",
+  };
+</script>
 <script src="{{ url_for('static', filename='js/game.js') }}"></script>
 </body>
 </html>

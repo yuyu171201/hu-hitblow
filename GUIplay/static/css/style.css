@@ -522,6 +522,196 @@ body::before {
 }
 .gameover-stats strong { color: var(--text-primary); font-weight: 700; }
 
+/* ===== Mode Menu ===== */
+.mode-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+.mode-card:hover {
+  background: var(--bg-card-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 172, 193, 0.15);
+}
+.mode-emoji { font-size: 2.6rem; line-height: 1; }
+.mode-body { flex: 1; }
+.mode-title { font-size: 1.25rem; font-weight: 800; }
+.mode-desc { font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem; }
+.mode-arrow { font-size: 1.6rem; color: var(--accent); font-weight: 800; }
+
+/* ===== Back link ===== */
+.back-link { margin-top: 0.5rem; }
+.back-link a {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+.back-link a:hover { color: var(--accent); }
+
+/* ===== VS Setup ===== */
+.setup-note {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+.secret-input {
+  width: 100%;
+  padding: 18px;
+  border-radius: 16px;
+  border: 2.5px solid var(--slot-default);
+  background: rgba(255, 255, 255, 0.5);
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.4em;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+.secret-input:focus {
+  border-color: var(--slot-selected);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* ===== VS Handoff ===== */
+.handoff-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0.6rem 0 0.3rem;
+}
+.handoff-detail { color: var(--text-secondary); font-size: 0.95rem; }
+
+/* ===== VS Result ===== */
+.vs-result-grid {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.result-card { flex: 1; text-align: center; margin-bottom: 0; }
+.result-card.winner {
+  border-color: var(--success-border);
+  background: var(--success-bg);
+  box-shadow: 0 0 24px rgba(81, 207, 102, 0.25);
+}
+.result-player { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.4rem; }
+.result-status { font-size: 0.95rem; margin-bottom: 0.8rem; }
+.result-stats { display: flex; flex-direction: column; gap: 0.4rem; }
+.result-stats > div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+.result-stats span { color: var(--text-secondary); }
+.result-stats strong { font-family: var(--font-mono); }
+.result-answer {
+  margin-top: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--hit-color);
+}
+
+/* ===== VS: lobby ===== */
+.lobby-label {
+  display: block;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+/* ===== VS: turn banner ===== */
+.vs-banner {
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.05rem;
+  padding: 0.4rem 0;
+}
+.vs-banner.your-turn { color: var(--accent); }
+.vs-banner.wait-turn,
+.vs-banner.waiting { color: var(--text-secondary); }
+
+/* ===== VS: boards ===== */
+.vs-boards {
+  display: flex;
+  gap: 0.8rem;
+}
+.vs-board {
+  flex: 1;
+  min-width: 0;
+  border-radius: 14px;
+  padding: 0.7rem;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  transition: all 0.25s;
+}
+.vs-board.active {
+  border-color: var(--slot-selected);
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+.vs-board.solved {
+  border-color: var(--success-border);
+  background: var(--success-bg);
+}
+.vs-name {
+  font-weight: 800;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.turn-dot {
+  color: var(--accent);
+  font-size: 0.7rem;
+  animation: livesPulse 1s ease-in-out infinite;
+}
+.vs-history {
+  list-style: none;
+  max-height: 260px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.vs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 5px 6px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  background: rgba(255, 255, 255, 0.5);
+  animation: slideIn 0.3s;
+}
+.vs-row .history-guess { font-size: 1rem; letter-spacing: 0.1em; }
+.vs-row .badge { padding: 2px 6px; font-size: 0.75rem; }
+.vs-row .history-result { gap: 5px; }
+.vs-empty {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  padding: 6px;
+  text-align: center;
+}
+
+/* 相手の番のとき入力欄をロック */
+#input-card.locked { opacity: 0.5; pointer-events: none; }
+
+/* 敗北時の結果カード */
+.victory-card.lose {
+  background: rgba(255, 107, 107, 0.15);
+  border-color: rgba(255, 107, 107, 0.4);
+}
+.victory-card.lose h2 {
+  background: none;
+  -webkit-text-fill-color: initial;
+  color: var(--hit-color);
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 400px) {
   .slot { width: 60px; height: 74px; font-size: 1.8rem; }
