@@ -7,7 +7,6 @@
 """
 
 from .core import judge, make_secret
-
 import time
 
 
@@ -244,6 +243,11 @@ def play(digits=3):
             print(f"★ 最終スコア: {final_score:.2f}")
             break
 
+        # ゲームオーバー判定（正解できなかった場合）
+        if lives <= 0:
+            print(f"\nゲームオーバー... ライフが0になりました。（答えは {secret} でした）")
+            break
+            
         # ゲームオーバー判定（正解できなかった場合）
         if lives <= 0:
             print(f"\nゲームオーバー... ライフが0になりました。（答えは {secret} でした）")
