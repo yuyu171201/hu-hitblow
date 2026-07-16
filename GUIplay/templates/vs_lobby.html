@@ -33,6 +33,8 @@
 </div>
 
 <script>
+  // サブパス（BASE_PATH）を含む基準URL。直接公開時は空文字。
+  const BASE = "{{ request.script_root }}";
   const btn = document.getElementById('join-btn');
   const nameInput = document.getElementById('name');
   const errBox = document.getElementById('lobby-error');
@@ -46,7 +48,7 @@
     }
     btn.disabled = true;
     try {
-      const res = await fetch('/vs/join', {
+      const res = await fetch(BASE + '/vs/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name }),
@@ -55,7 +57,7 @@
       // pid はタブ単位で保持（同一ブラウザの別タブでも別プレイヤーになれる）
       sessionStorage.setItem('vs_pid', data.pid);
       sessionStorage.setItem('vs_name', name);
-      window.location.href = '/vs/play';
+      window.location.href = BASE + '/vs/play';
     } catch (e) {
       errBox.textContent = '通信エラーが発生しました';
       errBox.style.display = 'block';

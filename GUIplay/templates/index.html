@@ -109,12 +109,12 @@
 </div>
 
 <script>
-  // モードごとの通信先・終了時の挙動を game.js に渡す
+  // 通信先は url_for でサブパス（BASE_PATH）を自動で含める
   window.GAME_CONFIG = {
     mode: "{{ mode | default('solo') }}",
-    guessUrl: "{{ '/vs/guess' if mode == 'vs' else '/guess' }}",
-    itemUrl: "/item",
-    newGameUrl: "/new_game",
+    guessUrl: "{{ url_for('game.guess') }}",
+    itemUrl: "{{ url_for('game.item') }}",
+    newGameUrl: "{{ url_for('game.new_game') }}",
   };
 </script>
 <script src="{{ url_for('static', filename='js/game.js') }}"></script>

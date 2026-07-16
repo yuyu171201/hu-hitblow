@@ -78,6 +78,10 @@
   </div>
 </div>
 
+<script>
+  // サブパス（BASE_PATH）を含む基準URL。直接公開時は空文字。vs.js が参照する。
+  window.APP_BASE = "{{ request.script_root }}";
+</script>
 <script src="{{ url_for('static', filename='js/vs.js') }}"></script>
 </body>
 </html>

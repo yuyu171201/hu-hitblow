@@ -2,10 +2,13 @@
 // サーバー側 vs_store の状態を /vs/state でポーリングし、
 // 自分の手番のときだけ入力できるようにする。
 
+// サブパス（BASE_PATH）を含む基準URL。直接公開時は空文字。
+const BASE = window.APP_BASE || "";
+
 const PID = sessionStorage.getItem('vs_pid');
 if (!PID) {
   // pid が無い（直接 /vs/play を開いた等）→ ロビーへ
-  window.location.href = '/vs';
+  window.location.href = BASE + '/vs';
 }
 
 // ===== 入力状態 =====
@@ -14,6 +17,7 @@ const digits = [null, null, null];
 let myTurn = false;        // 今、自分の手番か
 let finished = false;      // 対戦終了したか
 let pollTimer = null;
+let lastBoardsSig = null;  // 盤面の内容シグネチャ（変化時のみ再描画するため）
 
 // ===== スロット選択 =====
 function selectSlot(index) {
@@ -94,7 +98,7 @@ async function submitGuess() {
   if (guess.length !== 3 || digits.includes(null)) return;
 
   try {
-    const res = await fetch('/vs/guess', {
+    const res = await fetch(BASE + '/vs/guess', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pid: PID, guess }),
@@ -111,7 +115,7 @@ async function submitGuess() {
 // ===== アイテム（High/Low ヒント・自分のみ） =====
 async function useItem() {
   try {
-    const res = await fetch('/vs/item', {
+    const res = await fetch(BASE + '/vs/item', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pid: PID }),
@@ -132,7 +136,7 @@ async function useItem() {
 // ===== ポーリング =====
 async function poll() {
   try {
-    const res = await fetch('/vs/state?pid=' + encodeURIComponent(PID));
+    const res = await fetch(BASE + '/vs/state?pid=' + encodeURIComponent(PID));
     const data = await res.json();
     if (data.error) return;
     render(data);
@@ -192,6 +196,20 @@ function render(s) {
 function renderBoards(s) {
   const boards = document.getElementById('boards');
   const you = s.your_index;
+
+  // 内容が変わっていなければ再描画しない（毎秒の innerHTML 差し替えで
+  // slideIn アニメが再生され、過去の予想が点滅するのを防ぐ）。
+  const sig = JSON.stringify({
+    turn: s.turn,
+    status: s.status,
+    n: s.players.length,
+    p: s.players.map(p => [
+      p.name, p.solved, p.guesses.map(g => `${g.guess}${g.hit}${g.blow}`).join(','),
+    ]),
+  });
+  if (sig === lastBoardsSig) return;
+  lastBoardsSig = sig;
+
   let html = '';
   s.players.forEach((p, i) => {
     const isYou = i === you;
