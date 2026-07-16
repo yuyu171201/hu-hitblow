@@ -116,8 +116,9 @@ async function submitGuess() {
       return;
     }
 
-    // Update tries
+    // Update tries / lives
     document.getElementById('tries-count').textContent = data.tries;
+    if (data.lives != null) updateLives(data.lives);
 
     // Add to history
     addHistory(data.tries, guess, data.hit, data.blow);
@@ -129,7 +130,12 @@ async function submitGuess() {
       // サーバー側で game.py と同じ time.time() で計算した所要時間を使用
       const elapsed = data.elapsed != null ? data.elapsed : ((Date.now() - startTime) / 1000).toFixed(1);
       // game.py L43 と同じメッセージ: 「正解！ {tries} 回で当たり（答え {secret}）」
-      showVictory(data.tries, elapsed, guess, data.message);
+      showVictory(data.tries, elapsed, guess, data.message, data.score);
+    } else if (data.gameover) {
+      // ライフ切れ → ゲームオーバー (game.py L75-76)
+      gameOver = true;
+      clearInterval(timerInterval);
+      showGameOver(data.message);
     } else {
       // Reset for next guess
       clearSlots();
@@ -170,7 +176,7 @@ function updateTimer() {
 // game.py L43-44 の表示を GUI で再現:
 //   正解！ {tries} 回で当たり（答え {secret}）
 //   所要時間: {end - start:.2f} 秒
-function showVictory(tries, elapsed, answer, serverMessage) {
+function showVictory(tries, elapsed, answer, serverMessage, score) {
   const stats = document.getElementById('victory-stats');
   let html = '';
   if (serverMessage) {
@@ -181,12 +187,66 @@ function showVictory(tries, elapsed, answer, serverMessage) {
     html += `<strong>${tries}</strong> 回で正解！<br>`;
   }
   if (elapsed != null) {
-    // game.py L44: 所要時間: {end - start:.2f} 秒
-    html += `所要時間: <strong>${elapsed}</strong> 秒`;
+    // game.py L67: 基本所要時間: {base_time:.2f} 秒
+    html += `所要時間: <strong>${elapsed}</strong> 秒<br>`;
+  }
+  if (score != null) {
+    // game.py L71: ★ 最終スコア: {final_score:.2f}
+    html += `★ 最終スコア: <strong>${score}</strong>`;
   }
   stats.innerHTML = html;
   document.getElementById('victory-overlay').classList.add('show');
   launchConfetti();
+}
+
+// ===== Game Over =====
+// game.py L76: ゲームオーバー... ライフが0になりました。（答えは {secret} でした）
+function showGameOver(serverMessage) {
+  document.getElementById('gameover-stats').innerHTML =
+    serverMessage ? `<strong>${serverMessage}</strong>` : 'ライフが 0 になりました';
+  document.getElementById('gameover-overlay').classList.add('show');
+}
+
+// ===== Lives =====
+function updateLives(lives) {
+  const el = document.getElementById('lives-count');
+  el.textContent = lives;
+  // 残り少なくなったら赤く警告
+  el.classList.toggle('low', lives <= 3);
+}
+
+// ===== Items =====
+// game.py の use_item() を呼び出す。1ゲーム1回のみ使用可能。
+async function useItem(kind) {
+  if (gameOver) return;
+  try {
+    const res = await fetch('/item', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kind })
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      showItemHint(data.error, true);
+      return;
+    }
+
+    // どちらのアイテムも使用したら両方無効化（item_amount は 1→0）
+    if (data.item_amount != null && data.item_amount <= 0) {
+      document.getElementById('item-shuffle').disabled = true;
+      document.getElementById('item-highlow').disabled = true;
+    }
+    showItemHint(`【アイテム使用】${data.message}`, false);
+  } catch (err) {
+    showItemHint('通信エラーが発生しました', true);
+  }
+}
+
+function showItemHint(text, isError) {
+  const el = document.getElementById('item-hint');
+  el.textContent = text;
+  el.className = 'item-hint show' + (isError ? ' error' : '');
 }
 
 // ===== Confetti =====
@@ -212,10 +272,16 @@ function launchConfetti() {
 async function newGame() {
   await fetch('/new_game', { method: 'POST' });
   document.getElementById('victory-overlay').classList.remove('show');
+  document.getElementById('gameover-overlay').classList.remove('show');
   document.getElementById('history-list').innerHTML = '';
   document.getElementById('history-card').style.display = 'none';
   document.getElementById('tries-count').textContent = '0';
   document.getElementById('timer').textContent = '00:00';
+  // ライフ・アイテムを初期状態に戻す
+  updateLives(15);
+  document.getElementById('item-shuffle').disabled = false;
+  document.getElementById('item-highlow').disabled = false;
+  document.getElementById('item-hint').className = 'item-hint';
   gameOver = false;
   startTime = null;
   clearInterval(timerInterval);

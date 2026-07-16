@@ -48,6 +48,19 @@ def guess():
     return jsonify(result)
 
 
+@bp.route("/item", methods=["POST"])
+def item():
+    """アイテムを使用（HitBlowGame.use_item()）して結果を JSON で返す。"""
+    data = request.get_json()
+    kind = data.get("kind", "")
+
+    game = _get_game()
+    result = game.use_item(kind)
+    _save_game(game)
+
+    return jsonify(result)
+
+
 @bp.route("/new_game", methods=["POST"])
 def new_game():
     """新しいゲームを開始。"""

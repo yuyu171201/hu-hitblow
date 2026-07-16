@@ -37,8 +37,10 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
+    # PORT 環境変数があればそれを使う（無ければ 5000）
+    port = int(os.environ.get("PORT", 5000))
     print("=" * 50)
     print(f"  Hit & Blow GUI（{DIGITS} 桁・重複なし）")  # game.py L16 と同じ表示
-    print("  http://127.0.0.1:5000 でプレイ！")
+    print(f"  http://127.0.0.1:{port} でプレイ！")
     print("=" * 50)
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host="127.0.0.1", port=port, debug=True)
