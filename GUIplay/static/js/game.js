@@ -250,9 +250,8 @@ async function useItem(kind) {
       return;
     }
 
-    // どちらのアイテムも使用したら両方無効化（item_amount は 1→0）
+    // アイテム使用したらボタンを無効化（item_amount は 1→0）
     if (data.item_amount != null && data.item_amount <= 0) {
-      document.getElementById('item-shuffle').disabled = true;
       document.getElementById('item-highlow').disabled = true;
     }
     showItemHint(`【アイテム使用】${data.message}`, false);
@@ -297,10 +296,8 @@ async function newGame() {
   document.getElementById('timer').textContent = '00:00';
   // ライフ・アイテムを初期状態に戻す
   updateLives(15);
-  // アイテムは1人プレイのみ存在（対戦では非表示）
-  const shuffleBtn = document.getElementById('item-shuffle');
+  // アイテムを初期状態に戻す（大小ヒントのみ）
   const highlowBtn = document.getElementById('item-highlow');
-  if (shuffleBtn) shuffleBtn.disabled = false;
   if (highlowBtn) highlowBtn.disabled = false;
   const itemHint = document.getElementById('item-hint');
   if (itemHint) itemHint.className = 'item-hint';

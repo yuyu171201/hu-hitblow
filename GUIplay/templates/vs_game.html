@@ -28,11 +28,12 @@
     </div>
   </div>
 
-  <!-- Item (High/Low hint, self only) -->
+  <!-- Item (shuffle / High/Low hint, self only) -->
   <div class="card" id="item-card">
     <div class="items-title">アイテム（1回のみ・自分だけに表示）</div>
     <div class="item-row">
-      <button class="btn-item" id="item-highlow" onclick="useItem()">🔍 大小ヒント</button>
+      <button class="btn-item" id="item-shuffle" onclick="useItem('shuffle')">🔀 数字リセット</button>
+      <button class="btn-item" id="item-highlow" onclick="useItem('highlow')">🔍 大小ヒント</button>
     </div>
     <div class="item-hint" id="item-hint"></div>
   </div>

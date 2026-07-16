@@ -112,13 +112,13 @@ async function submitGuess() {
   }
 }
 
-// ===== アイテム（High/Low ヒント・自分のみ） =====
-async function useItem() {
+// ===== アイテム（シャッフル or High/Low ヒント・自分のみ） =====
+async function useItem(kind) {
   try {
     const res = await fetch(BASE + '/vs/item', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pid: PID }),
+      body: JSON.stringify({ pid: PID, kind }),
     });
     const data = await res.json();
     if (data.error) {
@@ -127,11 +127,34 @@ async function useItem() {
       el.className = 'item-hint show error';
       return;
     }
+    // アイテム使用後は両ボタンを無効化
+    document.getElementById('item-shuffle').disabled = true;
+    document.getElementById('item-highlow').disabled = true;
+    if (kind === 'shuffle') {
+      const el = document.getElementById('item-hint');
+      el.textContent = '【アイテム使用】正解の数字が新しくリセットされました！';
+      el.className = 'item-hint show';
+    }
     render(data);
   } catch (e) {
     // 通信エラーは次のポーリングで復帰
   }
 }
+
+// ===== 退出通知 =====
+// タブを閉じる/他ページへ移動する直前に、サーバーへ「抜けた」ことを伝える。
+// fetch は unload 中に中断されうるので sendBeacon を使う（送りっぱなしでOK）。
+function notifyLeave() {
+  if (finished || !PID) return;   // 決着後はどちらが抜けても勝敗に影響しない
+  try {
+    const blob = new Blob([JSON.stringify({ pid: PID })], { type: 'application/json' });
+    navigator.sendBeacon(BASE + '/vs/leave', blob);
+  } catch (e) {
+    // beacon 非対応でも、相手側のタイムアウト検知で決着するので無視
+  }
+}
+window.addEventListener('pagehide', notifyLeave);
+window.addEventListener('beforeunload', notifyLeave);
 
 // ===== ポーリング =====
 async function poll() {
@@ -175,7 +198,9 @@ function render(s) {
       inputCard.classList.add('locked');
     }
     // アイテムボタン
+    const itemShuffle = document.getElementById('item-shuffle');
     const itemBtn = document.getElementById('item-highlow');
+    itemShuffle.disabled = !!s.you.item_used;
     itemBtn.disabled = !!s.you.item_used;
     // 自分のヒント表示
     if (s.you.hint) {
@@ -252,7 +277,14 @@ function showResult(s) {
   document.getElementById('result-emoji').textContent = iWon ? '🏆' : '😢';
   document.getElementById('result-title').textContent = iWon ? '勝利！' : '敗北…';
   const winnerName = s.winner_name || '';
-  let html = `<strong>${winnerName}</strong> が先に 3HIT で勝ち！<br>`;
+
+  let html;
+  if (s.win_reason === 'opponent_left') {
+    // 相手が退出 → 残ったユーザーの不戦勝
+    html = `相手が退出しました。<br><strong>${winnerName}</strong> の勝ちです！<br>`;
+  } else {
+    html = `<strong>${winnerName}</strong> が先に 3HIT で勝ち！<br>`;
+  }
   if (s.secret) html += `答え: <strong>${s.secret}</strong>`;
   document.getElementById('result-stats').innerHTML = html;
 

@@ -152,7 +152,20 @@ def vs_guess():
 
 @bp.route("/vs/item", methods=["POST"])
 def vs_item():
-    """High/Low ヒントを使用（1 ユーザー 1 回・自分にのみ表示）。"""
+    """アイテムを使用（シャッフル or High/Low ヒント）。1 ユーザー 1 回。"""
     data = request.get_json() or {}
     pid = data.get("pid", "")
-    return jsonify(vs_store.use_item(pid))
+    kind = data.get("kind", "highlow")
+    return jsonify(vs_store.use_item(pid, kind))
+
+
+@bp.route("/vs/leave", methods=["POST"])
+def vs_leave():
+    """退出通知（タブを閉じる/離脱）。残ったユーザーの不戦勝で終了させる。
+
+    クライアントは navigator.sendBeacon で呼ぶため、JSON の解析失敗でも
+    500 にせず silent=True で受ける。
+    """
+    data = request.get_json(silent=True) or {}
+    pid = data.get("pid", "")
+    return jsonify(vs_store.leave(pid))
