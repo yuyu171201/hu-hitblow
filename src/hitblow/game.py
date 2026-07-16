@@ -12,6 +12,8 @@ import time
 
 
 def play(digits=3):
+    item_amount = 1
+
     secret = make_secret(digits)
     print(f"Hit & Blow（{digits} 桁・重複なし）")
 
@@ -22,9 +24,20 @@ def play(digits=3):
         guess = input("予想 > ").strip()
 
         # ===== ② 入力コマンドに足す（ヒント など）: ここに書く（import もここに） =====
-        # 例:  from .hint import hint
-        #      if guess == "h":
-        #          print(hint(secret)); continue
+        # アイテム1: 数字のリセット（shuffle または item1）
+        if guess in ("shuffle", "item1") and item_amount > 0  :
+            item_amount -= 1
+            secret = make_secret(digits)
+            print("【アイテム使用】正解の数字が新しくリセットされました！")
+            continue
+
+        # アイテム2: High/Lowヒント（highlow または item2）
+        if guess in ("highlow", "item2") and item_amount > 0:
+            item_amount -= 1
+            # 0~4をlow、5~9をhighとしてリスト化し、カンマ区切りの文字列にする
+            hints = ["low" if int(d) <= 4 else "high" for d in secret]
+            print(f"【アイテム使用】各桁の大小: {', '.join(hints)}")
+            continue
 
         if tries == 1:
             start = time.time()
