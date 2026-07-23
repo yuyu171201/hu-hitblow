@@ -7,6 +7,7 @@
 """
 
 from .core import judge, make_secret
+from .score import calc_score
 
 import time
 
@@ -115,9 +116,8 @@ class HitBlowGame:
             self._end_time = time.time()
             base_time = self._end_time - self._start_time
             result["elapsed"] = round(base_time, 2)
-            # スコア = 基本時間 -（残りライフ × 10秒）-（アイテム未使用なら × 30秒）
-            result["score"] = round(
-                base_time - (self.lives * 10) - (self.item_amount * 30), 2
+            result["score"] = calc_score(
+                self.tries, self.lives, self.item_amount, base_time
             )
             result["message"] = (
                 f"正解！ {self.tries} 回で当たり（答え {self.secret}）"
@@ -214,14 +214,14 @@ def play(digits=3):
             # ===== ③ 勝利時に足す（スコア・履歴 など）: ここに書く =====
             base_time = end - start
             # スコア計算: 基本時間 -（残りライフ × 10秒）-（アイテム未使用なら × 30秒）
-            final_score = base_time - (lives * 10) - (item_amount * 30)
+            final_score = calc_score(tries, lives, item_amount, base_time)
 
             print(f"\n正解！ {tries} 回で当たり（答え {secret}）")
             print(f"基本所要時間: {base_time:.2f} 秒")
             print(f"【ボーナス】残りライフ({lives}) × -10秒: -{lives * 10} 秒")
             if item_amount > 0:
                 print("【ボーナス】アイテム未使用: -30 秒")
-            print(f"★ 最終スコア: {final_score:.2f}")
+            print(f"★ 最終スコア: {final_score} 点")
             break
 
         # ゲームオーバー判定（正解できなかった場合）
