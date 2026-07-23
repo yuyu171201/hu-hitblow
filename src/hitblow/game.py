@@ -6,8 +6,9 @@
    import も自分の場所の近くに書くこと（ファイル先頭にまとめない＝衝突回避）。
 """
 
-from .core import judge, make_secret
+from .core import judge, make_secret, make_secret2
 from .score import calc_score
+
 
 import time
 
@@ -171,27 +172,42 @@ class HitBlowGame:
 
 
 # ── CLI 版（従来どおり） ─────────────────────────────────
+def q():
+    print("easy:ライフ20個\n")
+    print("normal:ライフ15個\n")
+    print("hard:重複あり、ライフ30個\n")
+    print("very hard:重複あり、ライフ15個、アイテムなし\n")
 
 def play(digits=3):
-    secret = make_secret(digits)
     print(f"Hit & Blow（{digits} 桁・重複なし）")
 
-    print("どの難易度でプレイする: easy / normal / hard")
+    print("どの難易度でプレイする: easy / normal / hard / very hard")
+    q()
     difficulty = input("難易度 > ")
     match difficulty:
         case "easy":
             lives = 20
+            item_amount = 1
+            secret = make_secret(digits)
         case "normal":
             lives = 15
+            item_amount = 1
+            secret = make_secret(digits)
         case "hard":
-            lives = 7
+            lives = 30
+            item_amount = 1
+            secret = make_secret2(digits)
+        case "very hard":
+            lives = 15
+            item_amount = 0
+            secret = make_secret2(digits)
         case _:
             print("不明な難易度。normal で開始します。")
             lives = 15
+            secret = make_secret(digits)
     print(f"難易度：{difficulty} で開始します。")
 
     # ===== ① 開始時に足す（難易度・あいさつ など）: ここに書く =====
-    item_amount = 1
     start = time.time()  # 初回入力前から時間計測をスタートするように修正
     print(f"初期ライフ: {lives} （アイテムは1ゲーム中1回のみ使用可能）")
 
@@ -209,6 +225,9 @@ def play(digits=3):
             else:
                 print("アイテムはすでに使用済みです。")
             continue
+
+
+
 
         # ※タイマーは①で開始済み（元の if tries == 1: start = time.time() は不要）
 
