@@ -12,6 +12,8 @@ def calc_score(tries: int, lives: int, item_amount: int, elapsed_time: float, di
             bonus_multiplier = 1.0
         case "hard":
             bonus_multiplier = 3.0
+        case "very hard":
+            bonus_multiplier = 5.0
 
     bonus = (lives * 100 * bonus_multiplier) + (item_amount * 50) - int(elapsed_time)
     # 減点

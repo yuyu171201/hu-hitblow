@@ -224,6 +224,7 @@ def play(digits=3):
             print("不明な難易度。normal で開始します。")
             difficulty = "normal"
             lives = 15
+            item_amount = 1
             secret = make_secret(digits)
     print(f"難易度：{difficulty} で開始します。")
 
