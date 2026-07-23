@@ -17,7 +17,7 @@ from flask import (
     session,
 )
 
-from hitblow.game import HitBlowGame
+from hitblow.game import HitBlowGame, DIFFICULTY_LIVES
 
 import vs_store
 
@@ -55,14 +55,30 @@ def _save_game(game: HitBlowGame):
     session["game"] = game.to_dict()
 
 
+@bp.route("/difficulty")
+def difficulty():
+    """1人プレイの難易度選択画面（/solo の前段）。"""
+    return render_template("difficulty.html")
+
+
 @bp.route("/solo")
 def solo():
-    """1人プレイ画面。初回アクセス時にゲームを初期化。"""
-    _get_game()  # セッションになければ新規作成される
+    """1人プレイ画面。選択された難易度・重複有無で新しいゲームを初期化。"""
+    choice = request.args.get("difficulty", "normal")
+    if choice not in DIFFICULTY_LIVES:
+        choice = "normal"
+    # dup=1（重複あり）/ dup=0（重複なし）。既定は重複あり。
+    allow_dup = request.args.get("dup", "1") != "0"
+    game = HitBlowGame(digits=DIGITS, difficulty=choice, allow_dup=allow_dup)
+    _save_game(game)
     return render_template(
         "index.html",
         mode="solo",
-        subtitle="3 桁の数字を当てよう（重複なし）",
+        subtitle="3 桁の数字を当てよう（重複あり）" if allow_dup
+        else "3 桁の数字を当てよう（重複なし）",
+        difficulty=choice,
+        lives=game.lives,
+        allow_dup=allow_dup,
     )
 
 
@@ -94,10 +110,18 @@ def item():
 
 @bp.route("/new_game", methods=["POST"])
 def new_game():
-    """新しい 1人プレイを開始。"""
-    game = HitBlowGame(digits=DIGITS)
+    """新しい 1人プレイを開始（直前と同じ難易度を引き継ぐ）。"""
+    old = _get_game()
+    game = HitBlowGame(
+        digits=DIGITS, difficulty=old.difficulty, allow_dup=old.allow_dup
+    )
     _save_game(game)
-    return jsonify({"ok": True})
+    return jsonify({
+        "ok": True,
+        "lives": game.lives,
+        "difficulty": game.difficulty,
+        "allow_dup": game.allow_dup,
+    })
 
 
 # ══════════════════════════════════════════════════════════

@@ -12,7 +12,7 @@
 
 <div class="header">
   <h1>Hit &amp; Blow</h1>
-  <p>{{ subtitle | default('3 桁の数字を当てよう（重複なし）') }}</p>
+  <p>{{ subtitle | default('3 桁の数字を当てよう（重複あり）') }}</p>
   <p class="back-link"><a href="{{ url_for('game.menu') }}">← モード選択に戻る</a></p>
 </div>
 
@@ -26,7 +26,7 @@
       </div>
       <div>
         <span class="label">ライフ</span>
-        <span class="value" id="lives-count">15</span>
+        <span class="value" id="lives-count">{{ lives | default(15) }}</span>
       </div>
       <div>
         <span class="label">経過時間</span>
@@ -92,7 +92,7 @@
     <div class="victory-emoji">🎉</div>
     <h2>正解！</h2>
     <div class="victory-stats" id="victory-stats"></div>
-    <button class="btn-new-game" id="victory-btn" onclick="newGame()">もう一度遊ぶ</button>
+    <button class="btn-new-game" id="victory-btn" onclick="backToMenu()">モード選択に戻る</button>
   </div>
 </div>
 <div class="confetti-container" id="confetti-container"></div>
@@ -111,9 +111,11 @@
   // 通信先は url_for でサブパス（BASE_PATH）を自動で含める
   window.GAME_CONFIG = {
     mode: "{{ mode | default('solo') }}",
+    allowDup: {{ 'true' if allow_dup | default(true) else 'false' }},
     guessUrl: "{{ url_for('game.guess') }}",
     itemUrl: "{{ url_for('game.item') }}",
     newGameUrl: "{{ url_for('game.new_game') }}",
+    menuUrl: "{{ url_for('game.menu') }}",
   };
 </script>
 <script src="{{ url_for('static', filename='js/game.js') }}"></script>
