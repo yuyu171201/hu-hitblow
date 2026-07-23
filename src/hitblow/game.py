@@ -228,3 +228,8 @@ def play(digits=3):
         if lives <= 0:
             print(f"\nゲームオーバー... ライフが0になりました。（答えは {secret} でした）")
             break
+            
+        # ゲームオーバー判定（正解できなかった場合）
+        if lives <= 0:
+            print(f"\nゲームオーバー... ライフが0になりました。（答えは {secret} でした）")
+            break
