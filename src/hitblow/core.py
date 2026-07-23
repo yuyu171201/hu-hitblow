@@ -23,6 +23,6 @@ def make_secret(digits=3):
     """重複なしの digits 桁の答えを作る。"""
     return "".join(random.sample("0123456789", digits))
 
-def make_secret2(digit=3):
+def make_secret2(digits=3):
     """重複ありの digits 桁の答えを作る。"""
     return "".join(random.choices("0123456789", k=digits))
