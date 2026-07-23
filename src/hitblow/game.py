@@ -198,7 +198,7 @@ def q():
     print("very hard:重複あり、ライフ15個、アイテムなし\n")
 
 def play(digits=3):
-    print(f"Hit & Blow（{digits} 桁・重複なし）")
+    print(f"Hit & Blow（{digits} 桁）")
 
     print("どの難易度でプレイする: easy / normal / hard / very hard")
     q()
