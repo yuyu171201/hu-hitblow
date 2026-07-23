@@ -176,8 +176,21 @@ def play(digits=3):
     secret = make_secret(digits)
     print(f"Hit & Blow（{digits} 桁・重複なし）")
 
+    print("どの難易度でプレイする: easy / normal / hard")
+    difficulty = input("難易度 > ")
+    match difficulty:
+        case "easy":
+            lives = 20
+        case "normal":
+            lives = 15
+        case "hard":
+            lives = 7
+        case _:
+            print("不明な難易度。normal で開始します。")
+            lives = 15
+    print(f"難易度：{difficulty} で開始します。")
+
     # ===== ① 開始時に足す（難易度・あいさつ など）: ここに書く =====
-    lives = 15
     item_amount = 1
     start = time.time()  # 初回入力前から時間計測をスタートするように修正
     print(f"初期ライフ: {lives} （アイテムは1ゲーム中1回のみ使用可能）")
