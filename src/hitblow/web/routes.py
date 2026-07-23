@@ -19,7 +19,7 @@ from flask import (
 
 from hitblow.game import HitBlowGame, DIFFICULTY_LIVES
 
-import vs_store
+from . import vs_store
 
 # game.py の play(digits=3) と同じデフォルト桁数
 DIGITS = 3

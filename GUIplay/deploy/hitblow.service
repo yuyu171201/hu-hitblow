@@ -20,8 +20,8 @@ Environment=HOST=127.0.0.1
 Environment=PORT=8001
 Environment=DEBUG=0
 Environment=BASE_PATH=/hitblow
-# venv なら .venv/bin/python、システム Python なら /usr/bin/python3 など
-ExecStart=/srv/hitblow/.venv/bin/python GUIplay/server.py
+# venv 内の console script を使う（pyproject の [project.scripts] hitblow_server）
+ExecStart=/srv/hitblow/.venv/bin/hitblow_server
 Restart=always
 User=www-data
 

@@ -3,7 +3,7 @@
 このファイルは「アプリの組み立て」だけを担当する（＝create_app）。
 サーバーの起動（ポート・実行）は server.py が担当する。
 
-  起動:  python server.py
+  起動:  uv run hitblow_server
 
 サブパス配下での公開（リバースプロキシ）:
   BASE_PATH（例 "/hitblow"）を指定すると、その配下で動くようになる。
@@ -16,15 +16,11 @@
   - core.make_secret(digits)  → 重複なし digits 桁の答え生成
 """
 
-import sys
 import os
-
-# src/ を import パスに追加して既存の core.py を再利用
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from flask import Flask
 
-from routes import bp
+from .routes import bp
 
 
 class _PrefixMiddleware:

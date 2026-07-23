@@ -8,10 +8,10 @@ dependencies = [
     "flask>=3.1.3",
 ]
 
-# 第3回でコメントを外す：`hitblow` コマンドが使えるようになる
+# `hitblow` … CLI（1人プレイ）,  `hitblow_server` … GUI サーバー
 [project.scripts]
 hitblow = "hitblow.cli:main"
-# hitblow_server = "hitblow.server:run"
+hitblow_server = "hitblow.web.server:run"
 
 
 [build-system]
@@ -20,6 +20,11 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/hitblow"]
+# GUI のテンプレート / 静的ファイル（.html/.css/.js）も wheel に含める
+artifacts = [
+    "src/hitblow/web/templates/**",
+    "src/hitblow/web/static/**",
+]
 
 [dependency-groups]
 dev = ["pytest>=8"]
