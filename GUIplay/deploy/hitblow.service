@@ -1,0 +1,29 @@
+# /etc/systemd/system/hitblow.service
+# Hit & Blow GUI を内部ポート 8001・サブパス /hitblow で常駐させる。
+# 外部には出さず（HOST=127.0.0.1）、Nginx 経由でのみアクセスさせる。
+#
+#   sudo cp GUIplay/deploy/hitblow.service /etc/systemd/system/hitblow.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now hitblow
+#   sudo systemctl status hitblow
+#
+# ※ WorkingDirectory / ExecStart のパスと User は環境に合わせて書き換えること。
+#   venv を使う場合は ExecStart を /srv/hitblow/.venv/bin/python に。
+
+[Unit]
+Description=Hit & Blow GUI (Flask)
+After=network.target
+
+[Service]
+WorkingDirectory=/srv/hitblow
+Environment=HOST=127.0.0.1
+Environment=PORT=8001
+Environment=DEBUG=0
+Environment=BASE_PATH=/hitblow
+# venv なら .venv/bin/python、システム Python なら /usr/bin/python3 など
+ExecStart=/srv/hitblow/.venv/bin/python GUIplay/server.py
+Restart=always
+User=www-data
+
+[Install]
+WantedBy=multi-user.target

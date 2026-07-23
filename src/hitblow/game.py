@@ -19,9 +19,11 @@ class HitBlowGame:
     GUIplay/routes.py から import して使う。
     """
 
-    def __init__(self, digits=3):
+    def __init__(self, digits=3, secret=None):
         self.digits = digits
-        self.secret = make_secret(digits)
+        # secret を渡せば「相手が決めた答え」で開始（対戦モード用）。
+        # 省略時は従来どおりランダム生成（1人プレイ）。
+        self.secret = secret if secret is not None else make_secret(digits)
         self.tries = 0
         # ① 開始時（play() の① と同じ）: ライフ・アイテム・タイマー
         self.lives = 15
@@ -136,7 +138,6 @@ class HitBlowGame:
         """アイテムを使う（1ゲーム中1回のみ）。
 
         kind:
-          "shuffle" / "item1" … 正解の数字をリセット
           "highlow" / "item2" … 各桁の大小（high/low）ヒント
         """
         if self._won or self._over:
@@ -144,18 +145,7 @@ class HitBlowGame:
         if self.item_amount <= 0:
             return {"error": "アイテムはすでに使用済みです。"}
 
-        # アイテム1: 数字のリセット（shuffle）
-        if kind in ("shuffle", "item1"):
-            self.secret = make_secret(self.digits)
-            self.item_amount = 0
-            return {
-                "used": True,
-                "kind": "shuffle",
-                "item_amount": self.item_amount,
-                "message": "正解の数字が新しくリセットされました！",
-            }
-
-        # アイテム2: High/Low ヒント
+        # アイテム: High/Low ヒント
         if kind in ("highlow", "item2"):
             hints = ["low" if int(d) <= 4 else "high" for d in self.secret]
             self.item_amount = 0
@@ -196,17 +186,7 @@ def play(digits=3):
         guess = input("予想 > ").strip()
 
         # ===== ② 入力コマンドに足す（ヒント など）: ここに書く（import もここに） =====
-        # アイテム1: 数字のリセット（shuffle）
-        if guess in ("shuffle", "item1"):
-            if item_amount > 0:
-                secret = make_secret(digits)
-                item_amount = 0
-                print("【アイテム使用】正解の数字が新しくリセットされました！")
-            else:
-                print("アイテムはすでに使用済みです。")
-            continue
-
-        # アイテム2: High/Low ヒント
+        # アイテム: High/Low ヒント
         if guess in ("highlow", "item2"):
             if item_amount > 0:
                 hints = ["low" if int(d) <= 4 else "high" for d in secret]

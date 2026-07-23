@@ -1,3 +1,9 @@
+// ===== Config (mode-specific endpoints) =====
+// index.html の <script> で定義。無ければ 1人プレイのデフォルト。
+const CONFIG = window.GAME_CONFIG || {
+  mode: 'solo', guessUrl: '/guess', itemUrl: '/item', newGameUrl: '/new_game',
+};
+
 // ===== Game State =====
 let selectedSlot = 0;
 const digits = [null, null, null];
@@ -104,7 +110,7 @@ async function submitGuess() {
   }
 
   try {
-    const res = await fetch('/guess', {
+    const res = await fetch(CONFIG.guessUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ guess })
@@ -130,12 +136,12 @@ async function submitGuess() {
       // サーバー側で game.py と同じ time.time() で計算した所要時間を使用
       const elapsed = data.elapsed != null ? data.elapsed : ((Date.now() - startTime) / 1000).toFixed(1);
       // game.py L43 と同じメッセージ: 「正解！ {tries} 回で当たり（答え {secret}）」
-      showVictory(data.tries, elapsed, guess, data.message, data.score);
+      showVictory(data.tries, elapsed, guess, data.message, data.score, data.next_url);
     } else if (data.gameover) {
       // ライフ切れ → ゲームオーバー (game.py L75-76)
       gameOver = true;
       clearInterval(timerInterval);
-      showGameOver(data.message);
+      showGameOver(data.message, data.next_url);
     } else {
       // Reset for next guess
       clearSlots();
@@ -176,7 +182,7 @@ function updateTimer() {
 // game.py L43-44 の表示を GUI で再現:
 //   正解！ {tries} 回で当たり（答え {secret}）
 //   所要時間: {end - start:.2f} 秒
-function showVictory(tries, elapsed, answer, serverMessage, score) {
+function showVictory(tries, elapsed, answer, serverMessage, score, nextUrl) {
   const stats = document.getElementById('victory-stats');
   let html = '';
   if (serverMessage) {
@@ -195,15 +201,27 @@ function showVictory(tries, elapsed, answer, serverMessage, score) {
     html += `★ 最終スコア: <strong>${score}</strong>`;
   }
   stats.innerHTML = html;
+  applyEndButton('victory-btn', nextUrl);
   document.getElementById('victory-overlay').classList.add('show');
   launchConfetti();
 }
 
+// 対戦モードでは「もう一度遊ぶ」の代わりに次フェーズへ遷移させる。
+function applyEndButton(btnId, nextUrl) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  if (CONFIG.mode === 'vs' && nextUrl) {
+    btn.textContent = '次へ →';
+    btn.onclick = () => { window.location.href = nextUrl; };
+  }
+}
+
 // ===== Game Over =====
 // game.py L76: ゲームオーバー... ライフが0になりました。（答えは {secret} でした）
-function showGameOver(serverMessage) {
+function showGameOver(serverMessage, nextUrl) {
   document.getElementById('gameover-stats').innerHTML =
     serverMessage ? `<strong>${serverMessage}</strong>` : 'ライフが 0 になりました';
+  applyEndButton('gameover-btn', nextUrl);
   document.getElementById('gameover-overlay').classList.add('show');
 }
 
@@ -220,7 +238,7 @@ function updateLives(lives) {
 async function useItem(kind) {
   if (gameOver) return;
   try {
-    const res = await fetch('/item', {
+    const res = await fetch(CONFIG.itemUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ kind })
@@ -232,9 +250,8 @@ async function useItem(kind) {
       return;
     }
 
-    // どちらのアイテムも使用したら両方無効化（item_amount は 1→0）
+    // アイテム使用したらボタンを無効化（item_amount は 1→0）
     if (data.item_amount != null && data.item_amount <= 0) {
-      document.getElementById('item-shuffle').disabled = true;
       document.getElementById('item-highlow').disabled = true;
     }
     showItemHint(`【アイテム使用】${data.message}`, false);
@@ -270,7 +287,7 @@ function launchConfetti() {
 
 // ===== New Game =====
 async function newGame() {
-  await fetch('/new_game', { method: 'POST' });
+  await fetch(CONFIG.newGameUrl, { method: 'POST' });
   document.getElementById('victory-overlay').classList.remove('show');
   document.getElementById('gameover-overlay').classList.remove('show');
   document.getElementById('history-list').innerHTML = '';
@@ -279,9 +296,11 @@ async function newGame() {
   document.getElementById('timer').textContent = '00:00';
   // ライフ・アイテムを初期状態に戻す
   updateLives(15);
-  document.getElementById('item-shuffle').disabled = false;
-  document.getElementById('item-highlow').disabled = false;
-  document.getElementById('item-hint').className = 'item-hint';
+  // アイテムを初期状態に戻す（大小ヒントのみ）
+  const highlowBtn = document.getElementById('item-highlow');
+  if (highlowBtn) highlowBtn.disabled = false;
+  const itemHint = document.getElementById('item-hint');
+  if (itemHint) itemHint.className = 'item-hint';
   gameOver = false;
   startTime = null;
   clearInterval(timerInterval);

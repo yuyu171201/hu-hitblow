@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hit &amp; Blow — モード選択</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="header">
+  <h1>Hit &amp; Blow</h1>
+  <p>モードを選んでね</p>
+</div>
+
+<div class="game-container">
+  <a class="card mode-card" href="{{ url_for('game.solo') }}">
+    <div class="mode-emoji">🎯</div>
+    <div class="mode-body">
+      <div class="mode-title">1人プレイ</div>
+      <div class="mode-desc">PCが出題。ライフ・アイテム・スコアで挑戦</div>
+    </div>
+    <div class="mode-arrow">→</div>
+  </a>
+
+  <a class="card mode-card" href="{{ url_for('game.vs_lobby') }}">
+    <div class="mode-emoji">⚔️</div>
+    <div class="mode-body">
+      <div class="mode-title">2人対戦</div>
+      <div class="mode-desc">名前を入れて相手を待ち、同じ答えを交代で当て合う（先に3HITで勝ち）</div>
+    </div>
+    <div class="mode-arrow">→</div>
+  </a>
+</div>
+
+</body>
+</html>
