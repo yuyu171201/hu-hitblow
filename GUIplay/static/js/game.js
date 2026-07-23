@@ -1,7 +1,8 @@
 // ===== Config (mode-specific endpoints) =====
 // index.html の <script> で定義。無ければ 1人プレイのデフォルト。
 const CONFIG = window.GAME_CONFIG || {
-  mode: 'solo', guessUrl: '/guess', itemUrl: '/item', newGameUrl: '/new_game',
+  mode: 'solo', allowDup: true,
+  guessUrl: '/guess', itemUrl: '/item', newGameUrl: '/new_game',
 };
 
 // ===== Game State =====
@@ -25,11 +26,13 @@ function inputDigit(d) {
   if (gameOver) return;
   hideMessage();
 
-  // Check if digit is already used in another slot
-  for (let i = 0; i < 3; i++) {
-    if (i !== selectedSlot && digits[i] === d) {
-      showMessage('同じ数字は使えません');
-      return;
+  // 重複なしモードのときだけ、他スロットで使用済みの数字を弾く
+  if (!CONFIG.allowDup) {
+    for (let i = 0; i < 3; i++) {
+      if (i !== selectedSlot && digits[i] === d) {
+        showMessage('同じ数字は使えません');
+        return;
+      }
     }
   }
 
@@ -60,10 +63,11 @@ function inputDigit(d) {
 }
 
 // ===== Update Used Digits =====
+// 重複なしモードでは使用済みボタンを無効化。重複ありモードでは無効化しない。
 function updateUsedDigits() {
   document.querySelectorAll('.num-btn').forEach(btn => {
     const d = btn.textContent;
-    btn.classList.toggle('used', digits.includes(d));
+    btn.classList.toggle('used', !CONFIG.allowDup && digits.includes(d));
   });
 }
 
@@ -285,17 +289,25 @@ function launchConfetti() {
   setTimeout(() => { container.innerHTML = ''; }, 5000);
 }
 
+// ===== モード選択へ戻る =====
+// クリア画面（勝利オーバーレイ）からモード選択画面に戻る。
+function backToMenu() {
+  window.location.href = CONFIG.menuUrl || '/';
+}
+
 // ===== New Game =====
 async function newGame() {
-  await fetch(CONFIG.newGameUrl, { method: 'POST' });
+  const res = await fetch(CONFIG.newGameUrl, { method: 'POST' });
+  // 難易度・重複の有無は直前のゲームから引き継がれる（サーバー側で保持）。
+  const data = await res.json().catch(() => ({}));
   document.getElementById('victory-overlay').classList.remove('show');
   document.getElementById('gameover-overlay').classList.remove('show');
   document.getElementById('history-list').innerHTML = '';
   document.getElementById('history-card').style.display = 'none';
   document.getElementById('tries-count').textContent = '0';
   document.getElementById('timer').textContent = '00:00';
-  // ライフ・アイテムを初期状態に戻す
-  updateLives(15);
+  // ライフを引き継いだ難易度の初期値に戻す（返り値が無ければ 15）
+  updateLives(data.lives != null ? data.lives : 15);
   // アイテムを初期状態に戻す（大小ヒントのみ）
   const highlowBtn = document.getElementById('item-highlow');
   if (highlowBtn) highlowBtn.disabled = false;

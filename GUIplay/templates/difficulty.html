@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hit &amp; Blow — 難易度選択</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="header">
+  <h1>Hit &amp; Blow</h1>
+  <p>難易度と重複の有無を選んでね</p>
+  <p class="back-link"><a href="{{ url_for('game.menu') }}">← モード選択に戻る</a></p>
+</div>
+
+<div class="game-container">
+  <!-- 重複の有無 -->
+  <div class="card">
+    <div class="items-title">数字の重複</div>
+    <div class="item-row">
+      <label><input type="radio" name="dup" value="1" checked> 重複あり</label>
+      <label><input type="radio" name="dup" value="0"> 重複なし</label>
+    </div>
+  </div>
+
+  <a class="card mode-card diff-card" data-difficulty="easy" href="#">
+    <div class="mode-emoji">🟢</div>
+    <div class="mode-body">
+      <div class="mode-title">easy</div>
+      <div class="mode-desc">ライフ 20。じっくり挑戦できる</div>
+    </div>
+    <div class="mode-arrow">→</div>
+  </a>
+
+  <a class="card mode-card diff-card" data-difficulty="normal" href="#">
+    <div class="mode-emoji">🟡</div>
+    <div class="mode-body">
+      <div class="mode-title">normal</div>
+      <div class="mode-desc">ライフ 15。標準の難しさ</div>
+    </div>
+    <div class="mode-arrow">→</div>
+  </a>
+
+  <a class="card mode-card diff-card" data-difficulty="hard" href="#">
+    <div class="mode-emoji">🔴</div>
+    <div class="mode-body">
+      <div class="mode-title">hard</div>
+      <div class="mode-desc">ライフ 7。少ない試行で当てよう</div>
+    </div>
+    <div class="mode-arrow">→</div>
+  </a>
+</div>
+
+<script>
+  // /solo のベース URL（BASE_PATH 対応）
+  const SOLO_URL = "{{ url_for('game.solo') }}";
+
+  function currentDup() {
+    const sel = document.querySelector('input[name="dup"]:checked');
+    return sel ? sel.value : "1";
+  }
+
+  function refreshLinks() {
+    const dup = currentDup();
+    document.querySelectorAll('.diff-card').forEach(card => {
+      const d = card.dataset.difficulty;
+      card.href = `${SOLO_URL}?difficulty=${d}&dup=${dup}`;
+    });
+  }
+
+  document.querySelectorAll('input[name="dup"]').forEach(r => {
+    r.addEventListener('change', refreshLinks);
+  });
+  refreshLinks();
+</script>
+
+</body>
+</html>

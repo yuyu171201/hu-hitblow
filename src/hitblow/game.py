@@ -13,6 +13,10 @@ from .score import calc_score
 import time
 
 
+# 難易度ごとの初期ライフ（CLI 版 play() と同じ値）
+DIFFICULTY_LIVES = {"easy": 20, "normal": 15, "hard": 7}
+
+
 # ── GUI / Web から使うためのクラス ──────────────────────────
 
 class HitBlowGame:
@@ -22,14 +26,24 @@ class HitBlowGame:
     GUIplay/routes.py から import して使う。
     """
 
-    def __init__(self, digits=3, secret=None):
+    def __init__(self, digits=3, secret=None, difficulty="normal", allow_dup=True):
         self.digits = digits
+        # 重複あり/なしは難易度選択時に決定する。
+        #   allow_dup=True  … make_secret2（数字の重複あり）
+        #   allow_dup=False … make_secret （数字の重複なし）
+        self.allow_dup = allow_dup
         # secret を渡せば「相手が決めた答え」で開始（対戦モード用）。
-        # 省略時は従来どおりランダム生成（1人プレイ）。
-        self.secret = secret if secret is not None else make_secret(digits)
+        # 省略時は allow_dup に応じてランダム生成（1人プレイ）。
+        if secret is not None:
+            self.secret = secret
+        elif allow_dup:
+            self.secret = make_secret2(digits)
+        else:
+            self.secret = make_secret(digits)
         self.tries = 0
         # ① 開始時（play() の① と同じ）: ライフ・アイテム・タイマー
-        self.lives = 15
+        self.difficulty = difficulty if difficulty in DIFFICULTY_LIVES else "normal"
+        self.lives = DIFFICULTY_LIVES[self.difficulty]
         self.item_amount = 1
         self._start_time = time.time()  # 初回入力前から計測開始
         self._end_time = None
@@ -43,6 +57,8 @@ class HitBlowGame:
         return {
             "digits": self.digits,
             "secret": self.secret,
+            "difficulty": self.difficulty,
+            "allow_dup": self.allow_dup,
             "tries": self.tries,
             "lives": self.lives,
             "item_amount": self.item_amount,
@@ -58,6 +74,8 @@ class HitBlowGame:
         game = cls.__new__(cls)
         game.digits = data["digits"]
         game.secret = data["secret"]
+        game.difficulty = data.get("difficulty", "normal")
+        game.allow_dup = data.get("allow_dup", True)
         game.tries = data["tries"]
         game.lives = data.get("lives", 15)
         game.item_amount = data.get("item_amount", 1)
@@ -73,7 +91,8 @@ class HitBlowGame:
         """入力チェック。問題なければ None、エラーなら理由の文字列を返す。"""
         if len(guess) != self.digits or not guess.isdigit():
             return f"{self.digits} 桁の数字で入力してね"
-        if len(set(guess)) != len(guess):
+        # 重複なしモードのときだけ重複を弾く
+        if not self.allow_dup and len(set(guess)) != len(guess):
             return "数字が重複しています"
         return None
 
@@ -118,7 +137,7 @@ class HitBlowGame:
             base_time = self._end_time - self._start_time
             result["elapsed"] = round(base_time, 2)
             result["score"] = calc_score(
-                self.tries, self.lives, self.item_amount, base_time
+                self.tries, self.lives, self.item_amount, base_time, self.difficulty
             )
             result["message"] = (
                 f"正解！ {self.tries} 回で当たり（答え {self.secret}）"
@@ -203,6 +222,7 @@ def play(digits=3):
             secret = make_secret2(digits)
         case _:
             print("不明な難易度。normal で開始します。")
+            difficulty = "normal"
             lives = 15
             secret = make_secret(digits)
     print(f"難易度：{difficulty} で開始します。")
@@ -246,7 +266,7 @@ def play(digits=3):
             # ===== ③ 勝利時に足す（スコア・履歴 など）: ここに書く =====
             base_time = end - start
             # スコア計算: 基本時間 -（残りライフ × 10秒）-（アイテム未使用なら × 30秒）
-            final_score = calc_score(tries, lives, item_amount, base_time)
+            final_score = calc_score(tries, lives, item_amount, base_time, difficulty)
 
             print(f"\n正解！ {tries} 回で当たり（答え {secret}）")
             print(f"基本所要時間: {base_time:.2f} 秒")
@@ -256,11 +276,6 @@ def play(digits=3):
             print(f"★ 最終スコア: {final_score} 点")
             break
 
-        # ゲームオーバー判定（正解できなかった場合）
-        if lives <= 0:
-            print(f"\nゲームオーバー... ライフが0になりました。（答えは {secret} でした）")
-            break
-            
         # ゲームオーバー判定（正解できなかった場合）
         if lives <= 0:
             print(f"\nゲームオーバー... ライフが0になりました。（答えは {secret} でした）")
